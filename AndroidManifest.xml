@@ -24,6 +24,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <receiver android:name=".ActualizarNoticiasReceiver" />
+        <service android:name="com.olmo.proyecto.ActualizarNoticiasService"></service>
     </application>
 
 </manifest>

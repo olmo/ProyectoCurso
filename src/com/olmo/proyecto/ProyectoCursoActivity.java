@@ -1,8 +1,7 @@
 package com.olmo.proyecto;
 
-import java.io.IOException;
-
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
@@ -28,16 +27,7 @@ public class ProyectoCursoActivity extends Activity implements Callback {
 			cuentas = new Cuentas(this,hand,this);
 		}
 		
-		new Thread(new Runnable() {
-	        public void run() {
-	        	try{
-	        		GReader.getNoticias(ProyectoCursoActivity.this);
-	        	}
-	        	catch(IOException e){
-	    			
-	    		}
-	        }
-	    }).start();
+		startService(new Intent(this, ActualizarNoticiasService.class));
         
         setContentView(R.layout.main);
     }
