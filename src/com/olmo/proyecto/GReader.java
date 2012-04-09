@@ -215,8 +215,6 @@ public class GReader {
 				.timeout(5000)
 				.get();
 		
-		ArrayList<Future<Noticia>> items = new ArrayList<Future<Noticia>>();
-		
 		Elements noticias = doc.getElementsByTag("entry");
 		
 		NoticiaDB db = new NoticiaDB(context);
@@ -225,11 +223,11 @@ public class GReader {
 		for (Element noticia : noticias) {
 			Noticia item = new Noticia();
 			
-			item.setGid(noticia.getElementsByTag("id").text());
-			item.setTitulo(noticia.getElementsByTag("title").text());
+			item.setGid(noticia.getElementsByTag("id").first().text());
+			item.setTitulo(noticia.getElementsByTag("title").first().text());
 			item.setAutor(noticia.getElementsByTag("author").text());
 			item.setContenido(noticia.getElementsByTag("summary").text());
-			item.setUrl(noticia.getElementsByTag("link").attr("href"));
+			item.setUrl(noticia.getElementsByTag("link").first().attr("href"));
 			
 			db.insertNoticia(item);
 		}
