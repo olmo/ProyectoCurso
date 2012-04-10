@@ -1,5 +1,7 @@
 package com.olmo.proyecto.modelos;
 
+import java.util.Date;
+
 public class Noticia {
 	private int id;
 	private String gid;
@@ -7,7 +9,8 @@ public class Noticia {
 	private String autor;
 	private String contenido;
 	private String url;
-	
+	private Date timestamp = new Date();
+
 	public Noticia() {
 		
 	}
@@ -67,6 +70,14 @@ public class Noticia {
 
 	public void setContenido(String content) {
 		this.contenido = content;
+	}
+	
+	public Date getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(long timestamp) {
+		this.timestamp.setTime(timestamp);
 	}
 	
 }

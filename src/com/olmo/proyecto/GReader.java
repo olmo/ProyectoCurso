@@ -228,6 +228,7 @@ public class GReader {
 			item.setAutor(noticia.getElementsByTag("author").text());
 			item.setContenido(noticia.getElementsByTag("summary").text());
 			item.setUrl(noticia.getElementsByTag("link").first().attr("href"));
+			item.setTimestamp(Long.valueOf(noticia.attr("gr:crawl-timestamp-msec")).longValue());
 			
 			db.insertNoticia(item);
 		}
