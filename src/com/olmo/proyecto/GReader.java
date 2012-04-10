@@ -3,17 +3,18 @@ package com.olmo.proyecto;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.concurrent.Future;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import android.content.Context;
+
 import com.olmo.proyecto.modelos.Noticia;
 import com.olmo.proyecto.modelos.NoticiaDB;
-
-import android.content.Context;
+import com.olmo.proyecto.modelos.Tag;
+import com.olmo.proyecto.modelos.TagDB;
 
 public class GReader {
 	private static final String _AUTHPARAMS = "GoogleLogin auth=";
@@ -89,7 +90,7 @@ public class GReader {
 	 * @return      Google Reader User Info
 	 * @see         getGoogleToken
 	 */
-	public static String getUserInfo(String _USERNAME, String _PASSWORD) throws UnsupportedEncodingException, IOException {
+	/*public static String getUserInfo(String _USERNAME, String _PASSWORD) throws UnsupportedEncodingException, IOException {
 	      Document doc = Jsoup.connect(_USER_INFO_URL)
 	      .header("Authorization", _AUTHPARAMS + getGoogleAuthKey(_USERNAME,_PASSWORD))
 	    .userAgent("Proyecto")
@@ -99,16 +100,15 @@ public class GReader {
 	      // RETRIEVES THE RESPONSE USERINFO
 	      String _USERINFO = doc.body().text();
 	      return _USERINFO;
-	  }
+	  }*/
 	
-	public static String getUserInfo(String _AUTHKEY) throws UnsupportedEncodingException, IOException {
-	      Document doc = Jsoup.connect(_USER_INFO_URL)
-	      .header("Authorization", _AUTHPARAMS + _AUTHKEY)
-	    .userAgent("Proyecto")
-	    .timeout(4000)
-	    .get();
+	public static String getUserInfo() throws UnsupportedEncodingException, IOException {
+		Document doc = Jsoup.connect(_USER_INFO_URL)
+							.header("Authorization", _AUTHPARAMS + ProyectoCursoActivity.googleAuthKey)
+							.userAgent("Proyecto")
+							.timeout(4000)
+							.get();
 	 
-	      // RETRIEVES THE RESPONSE USERINFO
 	      String _USERINFO = doc.body().text();
 	      return _USERINFO;
 	  }
@@ -121,69 +121,16 @@ public class GReader {
 	   * @return      Google User ID
 	   * @see         getGoogleToken, getGoogleAuthKey
 	   */
-	public static String getGoogleUserID(String _USERNAME, String _PASSWORD) throws UnsupportedEncodingException, IOException {
-	      /* USERINFO RETURNED LOOKS LIKE
-	       * {"userId":"14577161871823252783",
-	       * "userName":"&lt;username&gt;","userProfileId":"&lt;21 numeric numbers",
-	       * "userEmail":"&lt;username&gt;@gmail.com",
-	       * "isBloggerUser":true,
-	       * "signupTimeSec":1159535065}
-	       */
+	/*public static String getGoogleUserID(String _USERNAME, String _PASSWORD) throws UnsupportedEncodingException, IOException {
 	      String _USERINFO = getUserInfo(_USERNAME, _PASSWORD);
 	      String _USERID = (String) _USERINFO.subSequence(11, 31);
 	      return _USERID;
 	  }
-	
-	public static String getGoogleUserID(String _AUTHKEY) throws UnsupportedEncodingException, IOException {
-	      /* USERINFO RETURNED LOOKS LIKE
-	       * {"userId":"14577161871823252783",
-	       * "userName":"&lt;username&gt;","userProfileId":"&lt;21 numeric numbers",
-	       * "userEmail":"&lt;username&gt;@gmail.com",
-	       * "isBloggerUser":true,
-	       * "signupTimeSec":1159535065}
-	       */
-	      String _USERINFO = getUserInfo(_AUTHKEY);
+	*/
+	public static String getGoogleUserID() throws UnsupportedEncodingException, IOException {
+	      String _USERINFO = getUserInfo();
 	      String _USERID = (String) _USERINFO.subSequence(11, 31);
 	      return _USERID;
-	  }
-	
-	
-	
-	public static String[] getTagList(String _USERNAME, String _PASSWORD) {
-	    
-	    ArrayList<String> _TAGTITLE_ARRAYLIST = new ArrayList<String>();
-	    String _TAG_LABEL = null;
-	    try {
-	      _TAG_LABEL = "user/" + getGoogleUserID(_USERNAME,_PASSWORD) + "/label/";
-	    } catch (IOException e) {
-	      // TODO Auto-generated catch block
-	      e.printStackTrace();
-	    }
-	 
-	    Document doc = null;
-	    try {
-	      doc = Jsoup.connect(_TAG_LIST_URL)
-	      .header("Authorization", _AUTHPARAMS + getGoogleAuthKey(_USERNAME,_PASSWORD))
-	      .userAgent("Proyecto")
-	      .timeout(6000)
-	      .get();
-	    } catch (IOException e) {
-	      // TODO Auto-generated catch block
-	      e.printStackTrace();
-	    }
-	 
-	      Elements links = doc.select("string");
-	      for (Element link : links) {
-	        String tagAttrib = link.attr("name");
-	        String tagText = link.text();
-	        if(Func_Strings.FindWordInString(tagText, _TAG_LABEL)) {
-	          _TAGTITLE_ARRAYLIST.add(tagText.substring(32));
-	        }
-	      }
-	 
-	    String[] _TAGTITLE_ARRAY = new String[_TAGTITLE_ARRAYLIST.size()];
-	    _TAGTITLE_ARRAYLIST.toArray(_TAGTITLE_ARRAY);
-	    return _TAGTITLE_ARRAY;
 	  }
 	
 	
@@ -234,6 +181,40 @@ public class GReader {
 		}
 		
 		db.close();
+	}
+	
+	public static void getTags(Context context) throws UnsupportedEncodingException, IOException {
+	    String _TAG_LABEL = null;
+	    try {
+	      _TAG_LABEL = "user/" + getGoogleUserID() + "/label/";
+	    } catch (IOException e) {
+	      // TODO Auto-generated catch block
+	      e.printStackTrace();
+	    }
+	    
+		Document doc = Jsoup.connect(_TAG_LIST_URL)
+				.header("Authorization", _AUTHPARAMS + ProyectoCursoActivity.googleAuthKey)
+				.userAgent("Proyecto")
+				.timeout(5000)
+				.get();
 		
+		Elements tags = doc.getElementsByTag("list").get(0).getElementsByTag("object");
+	    
+		TagDB db = new TagDB(context);
+		db.open();
+		
+		for (Element tag : tags) {
+			if(Func_Strings.FindWordInString(tag.getElementsByAttributeValue("name", "id").text(), _TAG_LABEL)){
+				Tag item = new Tag();
+				
+				item.setTerm(tag.getElementsByTag("string").get(0).text());
+				item.setGid(tag.getElementsByTag("string").get(1).text());
+				item.setNombre( tag.getElementsByTag("string").get(0).text().substring(32) );
+				
+				db.insertTag(item);
+			}
+		}
+		
+		db.close();
 	}
 }

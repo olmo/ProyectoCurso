@@ -34,6 +34,7 @@ public class ActualizarNoticiasService extends IntentService {
 		
 		try{
 			GReader.getNoticias(ActualizarNoticiasService.this);
+			GReader.getTags(ActualizarNoticiasService.this);
 			result = Activity.RESULT_OK;
 		}
 		catch(IOException e){

@@ -1,12 +1,13 @@
 package com.olmo.proyecto;
 
-import com.olmo.proyecto.modelos.NoticiaDB;
-
 import android.content.Context;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+
+import com.olmo.proyecto.modelos.NoticiaDB;
+import com.olmo.proyecto.modelos.TagDB;
 
 public class DatabaseHelper extends SQLiteOpenHelper
 {
@@ -24,6 +25,7 @@ public class DatabaseHelper extends SQLiteOpenHelper
 		//TODO Comprobar si la BD está creada o actualizada y si no crearla. (Almacenarlo en un sharedpreferences)
 		try {
 		    db.execSQL(NoticiaDB.DATABASE_CREATE);
+		    db.execSQL(TagDB.DATABASE_CREATE);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -34,7 +36,8 @@ public class DatabaseHelper extends SQLiteOpenHelper
 	{
 		Log.w(NoticiaDB.TAG, "Upgrading database from version " + oldVersion + " to " + newVersion + ", which will destroy all old data");
 		
-		db.execSQL("DROP TABLE IF EXISTS contacts");
+		db.execSQL("DROP TABLE IF EXISTS noticias");
+		db.execSQL("DROP TABLE IF EXISTS tags");
 		
 		onCreate(db);
 	}

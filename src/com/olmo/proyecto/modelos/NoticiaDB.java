@@ -12,21 +12,21 @@ import android.database.sqlite.SQLiteDatabase;
 
 
 public class NoticiaDB {
-		public static final String KEY_ID = "id";
-		public static final String KEY_GID = "gid";
-		public static final String KEY_TITULO = "titulo";
-		public static final String KEY_AUTOR = "autor";
-		public static final String KEY_CONTENIDO = "contenido";
-		public static final String KEY_URL = "url";
-		public static final String KEY_TIME = "timestamp";
-		public static final String TAG = "DBAdapter";
-		public static final String DATABASE_TABLE = "Noticias";
-		public static final String DATABASE_CREATE ="" +
-				"create table Noticias (id integer primary key autoincrement, "
-		          + "gid text unique, titulo text not null, autor text not null, contenido text not null, url text not null, timestamp integer not null);";
-		private final Context context;
-		private DatabaseHelper DBHelper;
-		private SQLiteDatabase db;
+	public static final String KEY_ID = "id";
+	public static final String KEY_GID = "gid";
+	public static final String KEY_TITULO = "titulo";
+	public static final String KEY_AUTOR = "autor";
+	public static final String KEY_CONTENIDO = "contenido";
+	public static final String KEY_URL = "url";
+	public static final String KEY_TIME = "timestamp";
+	public static final String TAG = "DBAdapter";
+	public static final String DATABASE_TABLE = "Noticias";
+	public static final String DATABASE_CREATE ="" +
+			"create table Noticias (id integer primary key autoincrement, "
+	          + "gid text unique, titulo text not null, autor text not null, contenido text not null, url text not null, timestamp integer not null);";
+	private final Context context;
+	private DatabaseHelper DBHelper;
+	private SQLiteDatabase db;
 		
 	public NoticiaDB(Context ctx)
 	{
