@@ -111,12 +111,10 @@ public class GReader {
 	 * return _USERINFO; }
 	 */
 
-	public static String getUserInfo() throws UnsupportedEncodingException,
-			IOException {
+	public static String getUserInfo() throws UnsupportedEncodingException, IOException {
 		Document doc = Jsoup
 				.connect(_USER_INFO_URL)
-				.header("Authorization",
-						_AUTHPARAMS + ProyectoCursoActivity.googleAuthKey)
+				.header("Authorization", _AUTHPARAMS + ProyectoCursoActivity.googleAuthKey)
 				.userAgent("Proyecto").timeout(4000).get();
 
 		String _USERINFO = doc.body().text();
@@ -136,25 +134,25 @@ public class GReader {
 	 * getUserInfo(_USERNAME, _PASSWORD); String _USERID = (String)
 	 * _USERINFO.subSequence(11, 31); return _USERID; }
 	 */
-	public static String getGoogleUserID() throws UnsupportedEncodingException,
-			IOException {
+	public static String getGoogleUserID() throws UnsupportedEncodingException, IOException {
 		String _USERINFO = getUserInfo();
 		String _USERID = (String) _USERINFO.subSequence(11, 31);
 		return _USERID;
 	}
 
-	public static void getNoticias(Context context)
-			throws UnsupportedEncodingException, IOException {
+	public static void getNoticias(Context context) throws UnsupportedEncodingException, IOException {
 		Document doc = Jsoup
 				.connect(_READING_LIST_URL)
-				.header("Authorization",
-						_AUTHPARAMS + ProyectoCursoActivity.googleAuthKey)
+				.header("Authorization", _AUTHPARAMS + ProyectoCursoActivity.googleAuthKey)
 				.userAgent("Proyecto").timeout(5000).get();
 
 		Elements noticias = doc.getElementsByTag("entry");
 
 		NoticiaDB db = new NoticiaDB(context);
 		db.open();
+		
+		FeedDB feeddb = new FeedDB(context);
+		feeddb.open();
 
 		for (Element noticia : noticias) {
 			Noticia item = new Noticia();
@@ -164,22 +162,21 @@ public class GReader {
 			item.setAutor(noticia.getElementsByTag("author").text());
 			item.setContenido(noticia.getElementsByTag("summary").text());
 			item.setUrl(noticia.getElementsByTag("link").first().attr("href"));
-			item.setTimestamp(Long.valueOf(
-					noticia.attr("gr:crawl-timestamp-msec")).longValue());
+			item.setTimestamp(Long.valueOf(noticia.attr("gr:crawl-timestamp-msec")).longValue());
+			item.setFeed(feeddb.getFeed(noticia.getElementsByTag("source").attr("gr:stream-id")));
 
 			db.insertNoticia(item);
 		}
 
+		feeddb.close();
 		db.close();
 	}
 
-	public static void getTags(Context context)
-			throws UnsupportedEncodingException, IOException {
+	public static void getTags(Context context) throws UnsupportedEncodingException, IOException {
 		String _TAG_LABEL = null;
 		try {
 			_TAG_LABEL = "user/" + getGoogleUserID() + "/label/";
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -237,8 +234,7 @@ public class GReader {
 			Elements tags_elem = feed.getElementsByTag("list").get(0).getElementsByTag("object");
 			
 			for (Element tag_elem : tags_elem){
-				Tag tag = tagdb.getTag(tag_elem.getElementsByTag("string").first().text());
-				tags.add(tag);
+				tags.add(tagdb.getTag(tag_elem.getElementsByTag("string").first().text()));
 			}
 			
 			item.setTags(tags);

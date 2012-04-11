@@ -19,11 +19,12 @@ public class NoticiaDB {
 	public static final String KEY_CONTENIDO = "contenido";
 	public static final String KEY_URL = "url";
 	public static final String KEY_TIME = "timestamp";
+	public static final String KEY_FEED = "feed";
 	public static final String TAG = "DBAdapter";
 	public static final String DATABASE_TABLE = "Noticias";
 	public static final String DATABASE_CREATE ="" +
 			"create table Noticias (id integer primary key autoincrement, "
-	          + "gid text unique, titulo text not null, autor text not null, contenido text not null, url text not null, timestamp integer not null);";
+	          + "gid text unique, titulo text not null, autor text not null, contenido text not null, url text not null, timestamp integer not null, feed integer not null);";
 	private final Context context;
 	private DatabaseHelper DBHelper;
 	private SQLiteDatabase db;
@@ -54,6 +55,7 @@ public class NoticiaDB {
 		initialValues.put(KEY_CONTENIDO, noticia.getContenido());
 		initialValues.put(KEY_URL, noticia.getUrl());
 		initialValues.put(KEY_TIME, noticia.getTimestamp().getTime());
+		initialValues.put(KEY_FEED, noticia.getFeed().getId());
 		return db.insert(DATABASE_TABLE, null, initialValues);	
 	}
 	
@@ -64,9 +66,12 @@ public class NoticiaDB {
 	
 	public ArrayList<Noticia> getAll()
 	{
-		Cursor cursor = db.query(DATABASE_TABLE, new String[] {KEY_ID, KEY_GID, KEY_TITULO, KEY_AUTOR, KEY_CONTENIDO, KEY_URL, KEY_TIME}, null, null, null, null, KEY_TIME + " DESC");
+		Cursor cursor = db.query(DATABASE_TABLE, new String[] {KEY_ID, KEY_GID, KEY_TITULO, KEY_AUTOR, KEY_CONTENIDO, KEY_URL, KEY_TIME, KEY_FEED}, null, null, null, null, KEY_TIME + " DESC");
 		
 		ArrayList<Noticia> noticias = new ArrayList<Noticia>();
+		
+		FeedDB feeddb = new FeedDB(context);
+		feeddb.open();
 		
 		cursor.moveToFirst();
 		while (cursor.isAfterLast() == false) {
@@ -78,9 +83,12 @@ public class NoticiaDB {
 			noticia.setContenido(cursor.getString(4));
 			noticia.setUrl(cursor.getString(5));
 			noticia.setTimestamp(cursor.getInt(6));
+			noticia.setFeed(feeddb.getFeed(cursor.getInt(7)));
         	noticias.add(noticia);
        	    cursor.moveToNext();
         }
+		
+		feeddb.close();
 		
 		cursor.close();
 		
@@ -89,7 +97,7 @@ public class NoticiaDB {
 	
 	public Noticia getNoticia(long id) throws SQLException
 	{
-		Cursor cursor = db.query(true, DATABASE_TABLE, new String[] {KEY_ID, KEY_GID, KEY_TITULO, KEY_AUTOR, KEY_CONTENIDO, KEY_URL, KEY_TIME}, KEY_ID + "=" + id, null, null, null, null, null);
+		Cursor cursor = db.query(true, DATABASE_TABLE, new String[] {KEY_ID, KEY_GID, KEY_TITULO, KEY_AUTOR, KEY_CONTENIDO, KEY_URL, KEY_TIME, KEY_FEED}, KEY_ID + "=" + id, null, null, null, null, null);
 		
 		if (cursor != null) {
 			cursor.moveToFirst();
@@ -102,6 +110,11 @@ public class NoticiaDB {
 			noticia.setContenido(cursor.getString(4));
 			noticia.setUrl(cursor.getString(5));
 			noticia.setTimestamp(cursor.getInt(6));
+			
+			FeedDB feeddb = new FeedDB(context);
+			feeddb.open();
+			noticia.setFeed(feeddb.getFeed(cursor.getInt(7)));
+			feeddb.close();
 			
 			return noticia;
 		}
@@ -118,6 +131,7 @@ public class NoticiaDB {
 		args.put(KEY_CONTENIDO, noticia.getContenido());
 		args.put(KEY_URL, noticia.getUrl());
 		args.put(KEY_URL, noticia.getTimestamp().getTime());
+		args.put(KEY_FEED, noticia.getFeed().getId());
 		
 	  return db.update(DATABASE_TABLE, args, KEY_ID + "=" + noticia.getId(), null) > 0;
 	  

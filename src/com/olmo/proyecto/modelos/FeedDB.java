@@ -103,6 +103,27 @@ public class FeedDB {
         return null;
 	}
 	
+	public Feed getFeed(String gid) throws SQLException
+	{
+		Cursor cursor = db.query(true, DATABASE_TABLE, new String[] {KEY_ID, KEY_GID, KEY_SHORTID, KEY_NOMBRE, KEY_WEB, KEY_FEED}, KEY_GID + "= '" + gid + "'", null, null, null, null, null);
+		
+		if (cursor != null) {
+			cursor.moveToFirst();
+			
+			Feed feed = new Feed();
+			feed.setId(cursor.getInt(0));
+			feed.setGid(cursor.getString(1));
+			feed.setShortid(cursor.getString(2));
+			feed.setNombre(cursor.getString(3));
+			feed.setWeb(cursor.getString(4));
+			feed.setFeed(cursor.getString(5));
+			
+			return feed;
+		}
+		
+        return null;
+	}
+	
 	public boolean updateTag(Feed feed)
 	{
 		ContentValues args = new ContentValues();

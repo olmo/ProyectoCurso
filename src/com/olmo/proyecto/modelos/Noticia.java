@@ -11,6 +11,7 @@ public class Noticia {
 	private String url;
 	private Date timestamp = new Date();
 	private int tag;
+	private Feed feed;
 
 	public Noticia() {
 		
@@ -87,6 +88,14 @@ public class Noticia {
 
 	public void setTag(int tag) {
 		this.tag = tag;
+	}
+
+	public Feed getFeed() {
+		return feed;
+	}
+
+	public void setFeed(Feed feed) {
+		this.feed = feed;
 	}
 	
 }
