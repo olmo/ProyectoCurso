@@ -14,11 +14,11 @@ public class TagDB {
 	public static final String KEY_ID = "id";
 	public static final String KEY_GID = "gid";
 	public static final String KEY_NOMBRE = "nombre";
-	public static final String KEY_TERM = "term";
+	public static final String KEY_SHORTID = "shortid";
 	public static final String DATABASE_TABLE = "Tags";
 	public static final String DATABASE_CREATE ="" +
 			"create table Tags (id integer primary key autoincrement, "
-	          + "gid text unique, nombre text not null, term text not null);";
+	          + "gid text unique, nombre text not null, shortid text not null);";
 	private final Context context;
 	private DatabaseHelper DBHelper;
 	private SQLiteDatabase db;
@@ -45,7 +45,7 @@ public class TagDB {
 		ContentValues initialValues = new ContentValues();
 		initialValues.put(KEY_GID, tag.getGid());
 		initialValues.put(KEY_NOMBRE, tag.getNombre());
-		initialValues.put(KEY_TERM, tag.getTerm());
+		initialValues.put(KEY_SHORTID, tag.getShortid());
 		return db.insert(DATABASE_TABLE, null, initialValues);	
 	}
 	
@@ -56,7 +56,7 @@ public class TagDB {
 	
 	public ArrayList<Tag> getAll()
 	{
-		Cursor cursor = db.query(DATABASE_TABLE, new String[] {KEY_ID, KEY_GID, KEY_NOMBRE, KEY_TERM}, null, null, null, null, null);
+		Cursor cursor = db.query(DATABASE_TABLE, new String[] {KEY_ID, KEY_GID, KEY_NOMBRE, KEY_SHORTID}, null, null, null, null, null);
 		
 		ArrayList<Tag> tags = new ArrayList<Tag>();
 		
@@ -66,7 +66,7 @@ public class TagDB {
 			tag.setId(cursor.getInt(0));
 			tag.setGid(cursor.getString(1));
 			tag.setNombre(cursor.getString(2));
-			tag.setTerm(cursor.getString(3));
+			tag.setShortid(cursor.getString(3));
         	tags.add(tag);
        	    cursor.moveToNext();
         }
@@ -78,7 +78,7 @@ public class TagDB {
 	
 	public Tag getTag(long id) throws SQLException
 	{
-		Cursor cursor = db.query(true, DATABASE_TABLE, new String[] {KEY_ID, KEY_GID, KEY_NOMBRE, KEY_TERM}, KEY_ID + "=" + id, null, null, null, null, null);
+		Cursor cursor = db.query(true, DATABASE_TABLE, new String[] {KEY_ID, KEY_GID, KEY_NOMBRE, KEY_SHORTID}, KEY_ID + "=" + id, null, null, null, null, null);
 		
 		if (cursor != null) {
 			cursor.moveToFirst();
@@ -87,7 +87,26 @@ public class TagDB {
 			tag.setId(cursor.getInt(0));
 			tag.setGid(cursor.getString(1));
 			tag.setNombre(cursor.getString(2));
-			tag.setTerm(cursor.getString(3));
+			tag.setShortid(cursor.getString(3));
+			
+			return tag;
+		}
+		
+        return null;
+	}
+	
+	public Tag getTag(String gid) throws SQLException
+	{
+		Cursor cursor = db.query(true, DATABASE_TABLE, new String[] {KEY_ID, KEY_GID, KEY_NOMBRE, KEY_SHORTID}, KEY_GID + "= '" + gid + "'", null, null, null, null, null);
+		
+		if (cursor != null) {
+			cursor.moveToFirst();
+			
+			Tag tag = new Tag();
+			tag.setId(cursor.getInt(0));
+			tag.setGid(cursor.getString(1));
+			tag.setNombre(cursor.getString(2));
+			tag.setShortid(cursor.getString(3));
 			
 			return tag;
 		}
@@ -100,7 +119,7 @@ public class TagDB {
 		ContentValues args = new ContentValues();
 		args.put(KEY_ID, tag.getGid());
 		args.put(KEY_NOMBRE, tag.getNombre());
-		args.put(KEY_TERM, tag.getTerm());
+		args.put(KEY_SHORTID, tag.getShortid());
 		
 	  return db.update(DATABASE_TABLE, args, KEY_ID + "=" + tag.getId(), null) > 0;
 	  

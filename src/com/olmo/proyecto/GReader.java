@@ -11,6 +11,8 @@ import org.jsoup.select.Elements;
 
 import android.content.Context;
 
+import com.olmo.proyecto.modelos.Feed;
+import com.olmo.proyecto.modelos.FeedDB;
 import com.olmo.proyecto.modelos.Noticia;
 import com.olmo.proyecto.modelos.NoticiaDB;
 import com.olmo.proyecto.modelos.Tag;
@@ -19,7 +21,7 @@ import com.olmo.proyecto.modelos.TagDB;
 public class GReader {
 	private static final String _AUTHPARAMS = "GoogleLogin auth=";
 	private static final String _GOOGLE_LOGIN_URL = "https://www.google.com/accounts/ClientLogin";
-	private static final String _READER_BASE_URL  = "http://www.google.com/reader/";
+	private static final String _READER_BASE_URL = "http://www.google.com/reader/";
 	private static final String _API_URL = _READER_BASE_URL + "api/0/";
 	private static final String _TOKEN_URL = _API_URL + "token";
 	private static final String _USER_INFO_URL = _API_URL + "user-info";
@@ -31,190 +33,221 @@ public class GReader {
 	private static final String _SUBSCRIPTION_URL = _API_URL + "subscription/edit";
 	private static final String _SUBSCRIPTION_LIST_URL = _API_URL + "subscription/list";
 	private static final String _READING_LIST_URL = _READER_BASE_URL + "atom/user/-/state/com.google/reading-list";
-	
+
 	/**
-	 * Returns a Google Authentication Key
-	 * Requires a Google Username and Password to be sent in the POST headers
-	 * to http://www.google.com/accounts/ClientLogin
-	 *
-	 * @param  GoogleGoogle_Username Google Username
-	 * @param  Google_Password Google Password
-	 * @return      Google authorisation token
-	 * @see         getGoogleToken
-	 */
-	public static String getGoogleAuthKey(String _USERNAME, String _PASSWORD) throws UnsupportedEncodingException, IOException {
-	     Document doc = Jsoup.connect(_GOOGLE_LOGIN_URL)
-							    .data("accountType", "GOOGLE",
-							        "Email", _USERNAME,
-							        "Passwd", _PASSWORD,
-							        "service", "reader",
-							        "source", "Proyecto")
-							    .userAgent("Proyecto")
-							    .timeout(4000)
-							    .post();
-	 
-	    // RETRIEVES THE RESPONSE TEXT inc SID and AUTH. We only want the AUTH key.
-	    String _AUTHKEY = doc.body().text().substring(doc.body().text().indexOf("Auth="), doc.body().text().length());
-	    _AUTHKEY = _AUTHKEY.replace( "Auth=","" );
-	    return _AUTHKEY;
-	}
-	
-	/**
-	 * Returns a Google Token
-	 * Requires a Google Username, Password and Auth key to be sent in the GET
-	 * to http://www.google.com/reader/api/0/token
+	 * Returns a Google Authentication Key Requires a Google Username and
+	 * Password to be sent in the POST headers to
+	 * http://www.google.com/accounts/ClientLogin
 	 * 
-	 * @param Google_Username Google Username
-	 * @param Google_Password Google Password
+	 * @param GoogleGoogle_Username
+	 *            Google Username
+	 * @param Google_Password
+	 *            Google Password
+	 * @return Google authorisation token
+	 * @see getGoogleToken
+	 */
+	public static String getGoogleAuthKey(String _USERNAME, String _PASSWORD)
+			throws UnsupportedEncodingException, IOException {
+		Document doc = Jsoup
+				.connect(_GOOGLE_LOGIN_URL)
+				.data("accountType", "GOOGLE", "Email", _USERNAME, "Passwd",
+						_PASSWORD, "service", "reader", "source", "Proyecto")
+				.userAgent("Proyecto").timeout(4000).post();
+
+		// RETRIEVES THE RESPONSE TEXT inc SID and AUTH. We only want the AUTH
+		// key.
+		String _AUTHKEY = doc
+				.body()
+				.text()
+				.substring(doc.body().text().indexOf("Auth="),
+						doc.body().text().length());
+		_AUTHKEY = _AUTHKEY.replace("Auth=", "");
+		return _AUTHKEY;
+	}
+
+	/**
+	 * Returns a Google Token Requires a Google Username, Password and Auth key
+	 * to be sent in the GET to http://www.google.com/reader/api/0/token
+	 * 
+	 * @param Google_Username
+	 *            Google Username
+	 * @param Google_Password
+	 *            Google Password
 	 * @return Google authorisation token
 	 */
-	public static String getGoogleToken(String _USERNAME, String _PASSWORD) throws UnsupportedEncodingException, IOException {
-	    Document doc = Jsoup.connect(_TOKEN_URL)
-	    .header("Authorization", _AUTHPARAMS + getGoogleAuthKey(_USERNAME,_PASSWORD))
-	    .userAgent("Proyecto")
-	    .timeout(4000)
-	    .get();
-	 
-	    // RETRIEVES THE RESPONSE TOKEN
-	    String _TOKEN = doc.body().text();
-	    return _TOKEN;
-	  }
-	
+	public static String getGoogleToken(String _USERNAME, String _PASSWORD)
+			throws UnsupportedEncodingException, IOException {
+		Document doc = Jsoup
+				.connect(_TOKEN_URL)
+				.header("Authorization",
+						_AUTHPARAMS + getGoogleAuthKey(_USERNAME, _PASSWORD))
+				.userAgent("Proyecto").timeout(4000).get();
+
+		// RETRIEVES THE RESPONSE TOKEN
+		String _TOKEN = doc.body().text();
+		return _TOKEN;
+	}
+
 	/**
-	 * Returns Google Reader User Info
-	 * Requires a Google Username, Password and AUTH key to be sent in the POST
-	 * to http://www.google.com/reader/api/0/user-info
-	 *
-	 * @param  GoogleGoogle_Username Google Username
-	 * @param  Google_Password Google Password
-	 * @return      Google Reader User Info
-	 * @see         getGoogleToken
+	 * Returns Google Reader User Info Requires a Google Username, Password and
+	 * AUTH key to be sent in the POST to
+	 * http://www.google.com/reader/api/0/user-info
+	 * 
+	 * @param GoogleGoogle_Username
+	 *            Google Username
+	 * @param Google_Password
+	 *            Google Password
+	 * @return Google Reader User Info
+	 * @see getGoogleToken
 	 */
-	/*public static String getUserInfo(String _USERNAME, String _PASSWORD) throws UnsupportedEncodingException, IOException {
-	      Document doc = Jsoup.connect(_USER_INFO_URL)
-	      .header("Authorization", _AUTHPARAMS + getGoogleAuthKey(_USERNAME,_PASSWORD))
-	    .userAgent("Proyecto")
-	    .timeout(4000)
-	    .get();
-	 
-	      // RETRIEVES THE RESPONSE USERINFO
-	      String _USERINFO = doc.body().text();
-	      return _USERINFO;
-	  }*/
-	
-	public static String getUserInfo() throws UnsupportedEncodingException, IOException {
-		Document doc = Jsoup.connect(_USER_INFO_URL)
-							.header("Authorization", _AUTHPARAMS + ProyectoCursoActivity.googleAuthKey)
-							.userAgent("Proyecto")
-							.timeout(4000)
-							.get();
-	 
-	      String _USERINFO = doc.body().text();
-	      return _USERINFO;
-	  }
-	
+	/*
+	 * public static String getUserInfo(String _USERNAME, String _PASSWORD)
+	 * throws UnsupportedEncodingException, IOException { Document doc =
+	 * Jsoup.connect(_USER_INFO_URL) .header("Authorization", _AUTHPARAMS +
+	 * getGoogleAuthKey(_USERNAME,_PASSWORD)) .userAgent("Proyecto")
+	 * .timeout(4000) .get();
+	 * 
+	 * // RETRIEVES THE RESPONSE USERINFO String _USERINFO = doc.body().text();
+	 * return _USERINFO; }
+	 */
+
+	public static String getUserInfo() throws UnsupportedEncodingException,
+			IOException {
+		Document doc = Jsoup
+				.connect(_USER_INFO_URL)
+				.header("Authorization",
+						_AUTHPARAMS + ProyectoCursoActivity.googleAuthKey)
+				.userAgent("Proyecto").timeout(4000).get();
+
+		String _USERINFO = doc.body().text();
+		return _USERINFO;
+	}
+
 	/**
-	   * Returns Google User ID
-	   * Requires a Google Username and Password to be sent in the POST headers
-	   * to http://www.google.com/accounts/ClientLogin
-	   *
-	   * @return      Google User ID
-	   * @see         getGoogleToken, getGoogleAuthKey
-	   */
-	/*public static String getGoogleUserID(String _USERNAME, String _PASSWORD) throws UnsupportedEncodingException, IOException {
-	      String _USERINFO = getUserInfo(_USERNAME, _PASSWORD);
-	      String _USERID = (String) _USERINFO.subSequence(11, 31);
-	      return _USERID;
-	  }
-	*/
-	public static String getGoogleUserID() throws UnsupportedEncodingException, IOException {
-	      String _USERINFO = getUserInfo();
-	      String _USERID = (String) _USERINFO.subSequence(11, 31);
-	      return _USERID;
-	  }
-	
-	
-	public static String[] getSubList(String _USERNAME, String _PASSWORD) throws UnsupportedEncodingException, IOException {
-		ArrayList<String> _SUBTITLE_ARRAYLIST = new ArrayList<String>();
-	 
-	    Document doc = Jsoup.connect(_SUBSCRIPTION_LIST_URL)
-	      .header("Authorization", _AUTHPARAMS + getGoogleAuthKey(_USERNAME,_PASSWORD))
-	    .userAgent("Proyecto")
-	    .timeout(5000)
-	    .get();
-	 
-	      Elements links = doc.select("string");
-	      for (Element link : links) {
-	        String tagAttrib = link.attr("name");
-	        String tagText = link.text();
-	          _SUBTITLE_ARRAYLIST.add(tagText);
-	      }
-	 
-	    String[] _SUBTITLE_ARRAY = new String[_SUBTITLE_ARRAYLIST.size()];
-	    _SUBTITLE_ARRAYLIST.toArray(_SUBTITLE_ARRAY);
-	    return _SUBTITLE_ARRAY;
-	  }
-	
-	public static void getNoticias(Context context) throws UnsupportedEncodingException, IOException{
-		Document doc = Jsoup.connect(_READING_LIST_URL)
-				.header("Authorization", _AUTHPARAMS + ProyectoCursoActivity.googleAuthKey)
-				.userAgent("Proyecto")
-				.timeout(5000)
-				.get();
-		
+	 * Returns Google User ID Requires a Google Username and Password to be sent
+	 * in the POST headers to http://www.google.com/accounts/ClientLogin
+	 * 
+	 * @return Google User ID
+	 * @see getGoogleToken, getGoogleAuthKey
+	 */
+	/*
+	 * public static String getGoogleUserID(String _USERNAME, String _PASSWORD)
+	 * throws UnsupportedEncodingException, IOException { String _USERINFO =
+	 * getUserInfo(_USERNAME, _PASSWORD); String _USERID = (String)
+	 * _USERINFO.subSequence(11, 31); return _USERID; }
+	 */
+	public static String getGoogleUserID() throws UnsupportedEncodingException,
+			IOException {
+		String _USERINFO = getUserInfo();
+		String _USERID = (String) _USERINFO.subSequence(11, 31);
+		return _USERID;
+	}
+
+	public static void getNoticias(Context context)
+			throws UnsupportedEncodingException, IOException {
+		Document doc = Jsoup
+				.connect(_READING_LIST_URL)
+				.header("Authorization",
+						_AUTHPARAMS + ProyectoCursoActivity.googleAuthKey)
+				.userAgent("Proyecto").timeout(5000).get();
+
 		Elements noticias = doc.getElementsByTag("entry");
-		
+
 		NoticiaDB db = new NoticiaDB(context);
 		db.open();
-		
+
 		for (Element noticia : noticias) {
 			Noticia item = new Noticia();
-			
+
 			item.setGid(noticia.getElementsByTag("id").first().text());
 			item.setTitulo(noticia.getElementsByTag("title").first().text());
 			item.setAutor(noticia.getElementsByTag("author").text());
 			item.setContenido(noticia.getElementsByTag("summary").text());
 			item.setUrl(noticia.getElementsByTag("link").first().attr("href"));
-			item.setTimestamp(Long.valueOf(noticia.attr("gr:crawl-timestamp-msec")).longValue());
-			
+			item.setTimestamp(Long.valueOf(
+					noticia.attr("gr:crawl-timestamp-msec")).longValue());
+
 			db.insertNoticia(item);
 		}
-		
+
 		db.close();
 	}
-	
-	public static void getTags(Context context) throws UnsupportedEncodingException, IOException {
-	    String _TAG_LABEL = null;
-	    try {
-	      _TAG_LABEL = "user/" + getGoogleUserID() + "/label/";
-	    } catch (IOException e) {
-	      // TODO Auto-generated catch block
-	      e.printStackTrace();
-	    }
-	    
-		Document doc = Jsoup.connect(_TAG_LIST_URL)
+
+	public static void getTags(Context context)
+			throws UnsupportedEncodingException, IOException {
+		String _TAG_LABEL = null;
+		try {
+			_TAG_LABEL = "user/" + getGoogleUserID() + "/label/";
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		Document doc = Jsoup
+				.connect(_TAG_LIST_URL)
 				.header("Authorization", _AUTHPARAMS + ProyectoCursoActivity.googleAuthKey)
-				.userAgent("Proyecto")
-				.timeout(5000)
-				.get();
-		
+				.userAgent("Proyecto").timeout(5000).get();
+
 		Elements tags = doc.getElementsByTag("list").get(0).getElementsByTag("object");
-	    
+
 		TagDB db = new TagDB(context);
 		db.open();
-		
+
 		for (Element tag : tags) {
-			if(Func_Strings.FindWordInString(tag.getElementsByAttributeValue("name", "id").text(), _TAG_LABEL)){
+			if (Func_Strings.FindWordInString(tag.getElementsByAttributeValue("name", "id").text(),_TAG_LABEL)) {
 				Tag item = new Tag();
-				
-				item.setTerm(tag.getElementsByTag("string").get(0).text());
-				item.setGid(tag.getElementsByTag("string").get(1).text());
-				item.setNombre( tag.getElementsByTag("string").get(0).text().substring(32) );
-				
+
+				item.setGid(tag.getElementsByTag("string").get(0).text());
+				item.setShortid(tag.getElementsByTag("string").get(1).text());
+				item.setNombre(tag.getElementsByTag("string").get(0).text().substring(32));
+
 				db.insertTag(item);
 			}
 		}
-		
+
 		db.close();
+	}
+
+	public static void getFeeds(Context context)
+			throws UnsupportedEncodingException, IOException {
+		
+		Document doc = Jsoup
+				.connect(_SUBSCRIPTION_LIST_URL)
+				.header("Authorization", _AUTHPARAMS + ProyectoCursoActivity.googleAuthKey)
+				.userAgent("Proyecto").timeout(5000).get();
+
+		Elements feeds = doc.getElementsByTag("list").get(0).children();
+		
+		TagDB tagdb = new TagDB(context);
+		tagdb.open();
+		
+		FeedDB db = new FeedDB(context);
+		db.open();
+		
+		for (Element feed : feeds) {
+			Feed item = new Feed();
+			
+			item.setGid(feed.getElementsByAttributeValue("name", "id").first().text());
+			item.setNombre(feed.getElementsByAttributeValue("name", "title").text());
+			item.setShortid(feed.getElementsByAttributeValue("name", "sortid").text());
+			item.setWeb(feed.getElementsByAttributeValue("name", "htmlUrl").text());
+			item.setFeed(item.getGid().substring(5));
+			
+			ArrayList<Tag> tags = new ArrayList<Tag>();
+			Elements tags_elem = feed.getElementsByTag("list").get(0).getElementsByTag("object");
+			
+			for (Element tag_elem : tags_elem){
+				Tag tag = tagdb.getTag(tag_elem.getElementsByTag("string").first().text());
+				tags.add(tag);
+			}
+			
+			item.setTags(tags);
+			
+			db.insertFeed(item);
+		}
+
+		tagdb.close();
+		db.close();
+		
 	}
 }

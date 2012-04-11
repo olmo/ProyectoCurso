@@ -10,6 +10,7 @@ public class Noticia {
 	private String contenido;
 	private String url;
 	private Date timestamp = new Date();
+	private int tag;
 
 	public Noticia() {
 		
@@ -78,6 +79,14 @@ public class Noticia {
 
 	public void setTimestamp(long timestamp) {
 		this.timestamp.setTime(timestamp);
+	}
+
+	public int getTag() {
+		return tag;
+	}
+
+	public void setTag(int tag) {
+		this.tag = tag;
 	}
 	
 }

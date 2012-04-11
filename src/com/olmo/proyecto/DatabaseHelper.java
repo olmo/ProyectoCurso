@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.olmo.proyecto.modelos.FeedDB;
 import com.olmo.proyecto.modelos.NoticiaDB;
 import com.olmo.proyecto.modelos.TagDB;
 
@@ -26,6 +27,7 @@ public class DatabaseHelper extends SQLiteOpenHelper
 		try {
 		    db.execSQL(NoticiaDB.DATABASE_CREATE);
 		    db.execSQL(TagDB.DATABASE_CREATE);
+		    db.execSQL(FeedDB.DATABASE_CREATE);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -38,6 +40,7 @@ public class DatabaseHelper extends SQLiteOpenHelper
 		
 		db.execSQL("DROP TABLE IF EXISTS noticias");
 		db.execSQL("DROP TABLE IF EXISTS tags");
+		db.execSQL("DROP TABLE IF EXISTS feeds");
 		
 		onCreate(db);
 	}

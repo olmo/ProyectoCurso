@@ -3,8 +3,8 @@ package com.olmo.proyecto.modelos;
 public class Tag {
 	private int id;
 	private String gid;
+	private String shortid;
 	private String nombre;
-	private String term;
 	
 	public int getId() {
 		return id;
@@ -25,10 +25,10 @@ public class Tag {
 		this.nombre = nombre;
 	}
 
-	public String getTerm() {
-		return term;
+	public String getShortid() {
+		return shortid;
 	}
-	public void setTerm(String term) {
-		this.term = term;
+	public void setShortid(String term) {
+		this.shortid = term;
 	}
 }
