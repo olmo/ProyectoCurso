@@ -2,6 +2,7 @@ package com.olmo.proyecto;
 
 import java.util.ArrayList;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.app.ListFragment;
@@ -15,13 +16,18 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.olmo.proyecto.modelos.Feed;
+import com.olmo.proyecto.modelos.FeedTagDB;
 import com.olmo.proyecto.modelos.Noticia;
 import com.olmo.proyecto.modelos.NoticiaDB;
+import com.olmo.proyecto.modelos.Tag;
+import com.olmo.proyecto.modelos.TagDB;
 import com.olmo.proyectocurso.R;
 
-public class TitulosFragment extends ListFragment {
+public class TitulosFragment extends ListFragment implements ActionBar.TabListener {
 	boolean mDualPane;
     int mCurCheckPosition = 0;
+    private int tag_sel = 0;
     
     private Handler handler = new Handler() {
 		public void handleMessage(Message message) {
@@ -29,21 +35,7 @@ public class TitulosFragment extends ListFragment {
 			if (message.arg1 == Activity.RESULT_OK ) {
 				Toast.makeText(getActivity(),"Actualizado", Toast.LENGTH_SHORT).show();
 				
-				NoticiaDB noticiaDB = new NoticiaDB(getActivity());
-		        noticiaDB.open();
-		        ArrayList<Noticia> noticias = noticiaDB.getAll();
-		        noticiaDB.close();
-		        
-		        String[] items = new String[noticias.size()];
-		        
-		        int i=0;
-		        for (Noticia noticia : noticias){
-		    		items[i] = noticia.getTitulo();
-		        	i++;
-		        }
-		        
-		        setListAdapter(new ArrayAdapter<String>(getActivity(),
-		                android.R.layout.simple_list_item_activated_1, items));
+				populateList(tag_sel);
 			} else {
 				Toast.makeText(getActivity(), "Actualización fallida.", Toast.LENGTH_SHORT).show();
 			}
@@ -55,30 +47,29 @@ public class TitulosFragment extends ListFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         
+        ActionBar bar = getActivity().getActionBar();
+        bar.setDisplayHomeAsUpEnabled(false);
+        bar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+        // Must call in order to get callback to onCreateOptionsMenu()
+        setHasOptionsMenu(true);
+        
+        TagDB tagdb = new TagDB(this.getActivity());
+        tagdb.open();
+        ArrayList<Tag> tags = tagdb.getAll();
+        tagdb.close();
+        
+        bar.addTab(bar.newTab().setText("Todos").setTabListener(this));
+        for(Tag tag : tags){
+        	bar.addTab(bar.newTab().setText(tag.getNombre()).setTabListener(this));
+        }
+        
         Intent intent = new Intent(getActivity(), ActualizarNoticiasService.class);
         Messenger messenger = new Messenger(handler);
 		intent.putExtra("MESSENGER", messenger);
 		getActivity().startService(intent);
 
-        // Populate list with our static array of titles.
-        NoticiaDB noticiaDB = new NoticiaDB(getActivity());
-        noticiaDB.open();
-        ArrayList<Noticia> noticias = noticiaDB.getAll();
-        noticiaDB.close();
-        
-        String[] items = new String[noticias.size()];
-        
-        int i=0;
-        for (Noticia noticia : noticias){
-    		items[i] = noticia.getTitulo();
-        	i++;
-        }
-        
-        setListAdapter(new ArrayAdapter<String>(getActivity(),
-                android.R.layout.simple_list_item_activated_1, items));
-        
-        /*setListAdapter(new ArrayAdapter<String>(getActivity(),
-                android.R.layout.simple_list_item_activated_1, Shakespeare.TITLES));*/
+        populateList(tag_sel);
 
         // Check to see if we have a frame in which to embed the details
         // fragment directly in the containing UI.
@@ -102,6 +93,50 @@ public class TitulosFragment extends ListFragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt("curChoice", mCurCheckPosition);
+    }
+    
+    public void populateList(int category) {
+    	if(category==0){
+	        NoticiaDB noticiaDB = new NoticiaDB(getActivity());
+	        noticiaDB.open();
+	        ArrayList<Noticia> noticias = noticiaDB.getAll();
+	        noticiaDB.close();
+	        
+	        String[] items = new String[noticias.size()];
+	        
+	        int i=0;
+	        for (Noticia noticia : noticias){
+	    		items[i] = noticia.getTitulo();
+	        	i++;
+	        }
+	        
+	        setListAdapter(new ArrayAdapter<String>(getActivity(),
+	                android.R.layout.simple_list_item_activated_1, items));
+    	}
+    	else{
+    		FeedTagDB feeddb = new FeedTagDB(this.getActivity());
+    		feeddb.open();
+    		ArrayList<Feed> feeds = feeddb.getFeeds(category);
+    		feeddb.close();
+    		
+    		NoticiaDB noticiaDB = new NoticiaDB(getActivity());
+	        noticiaDB.open();
+	        ArrayList<Noticia> noticias = noticiaDB.getAllfromFeeds(feeds);
+	        noticiaDB.close();
+	        
+	        String[] items = new String[noticias.size()];
+	        
+	        int i=0;
+	        for (Noticia noticia : noticias){
+	    		items[i] = noticia.getTitulo();
+	        	i++;
+	        }
+	        
+	        setListAdapter(new ArrayAdapter<String>(getActivity(),
+	                android.R.layout.simple_list_item_activated_1, items));
+    	}
+        
+        tag_sel = category;
     }
 
     @Override
@@ -151,5 +186,22 @@ public class TitulosFragment extends ListFragment {
             startActivity(intent);
         }
         }
+    }
+    
+    public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+        TitulosFragment titleFrag = (TitulosFragment) getFragmentManager().findFragmentById(R.id.titles);
+        titleFrag.populateList(tab.getPosition());
+        
+        if (mDualPane) {
+            titleFrag.showDetails(0);
+        }
+    }
+
+    /* These must be implemented, but we don't use them */
+    
+    public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
+    }
+
+    public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
     }
 }

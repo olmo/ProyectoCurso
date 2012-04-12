@@ -1,14 +1,15 @@
 package com.olmo.proyecto.modelos;
 
 import java.util.ArrayList;
-
-import com.olmo.proyecto.DatabaseHelper;
+import java.util.Iterator;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+
+import com.olmo.proyecto.DatabaseHelper;
 
 
 public class NoticiaDB {
@@ -67,6 +68,46 @@ public class NoticiaDB {
 	public ArrayList<Noticia> getAll()
 	{
 		Cursor cursor = db.query(DATABASE_TABLE, new String[] {KEY_ID, KEY_GID, KEY_TITULO, KEY_AUTOR, KEY_CONTENIDO, KEY_URL, KEY_TIME, KEY_FEED}, null, null, null, null, KEY_TIME + " DESC");
+		
+		ArrayList<Noticia> noticias = new ArrayList<Noticia>();
+		
+		FeedDB feeddb = new FeedDB(context);
+		feeddb.open();
+		
+		cursor.moveToFirst();
+		while (cursor.isAfterLast() == false) {
+			Noticia noticia = new Noticia();
+			noticia.setId(cursor.getInt(0));
+			noticia.setGid(cursor.getString(1));
+			noticia.setTitulo(cursor.getString(2));
+			noticia.setAutor(cursor.getString(3));
+			noticia.setContenido(cursor.getString(4));
+			noticia.setUrl(cursor.getString(5));
+			noticia.setTimestamp(cursor.getInt(6));
+			noticia.setFeed(feeddb.getFeed(cursor.getInt(7)));
+        	noticias.add(noticia);
+       	    cursor.moveToNext();
+        }
+		
+		feeddb.close();
+		
+		cursor.close();
+		
+		return noticias;
+	}
+	
+	public ArrayList<Noticia> getAllfromFeeds(ArrayList<Feed> feeds)
+	{
+		String where = "";
+		Iterator<Feed> it = feeds.iterator();
+		while (it.hasNext()){
+			Feed feed = it.next();
+			where += KEY_FEED+" = " + feed.getId();
+			if(it.hasNext())
+				where += " OR ";
+		}
+		
+		Cursor cursor = db.query(DATABASE_TABLE, new String[] {KEY_ID, KEY_GID, KEY_TITULO, KEY_AUTOR, KEY_CONTENIDO, KEY_URL, KEY_TIME, KEY_FEED}, where, null, null, null, KEY_TIME + " DESC");
 		
 		ArrayList<Noticia> noticias = new ArrayList<Noticia>();
 		
