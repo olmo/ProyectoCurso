@@ -116,6 +116,8 @@ public class NoticiaDB {
 			noticia.setFeed(feeddb.getFeed(cursor.getInt(7)));
 			feeddb.close();
 			
+			cursor.close();
+			
 			return noticia;
 		}
 		

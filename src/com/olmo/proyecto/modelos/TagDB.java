@@ -89,6 +89,8 @@ public class TagDB {
 			tag.setNombre(cursor.getString(2));
 			tag.setShortid(cursor.getString(3));
 			
+			cursor.close();
+			
 			return tag;
 		}
 		

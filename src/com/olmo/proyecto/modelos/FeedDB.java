@@ -50,7 +50,19 @@ public class FeedDB {
 		initialValues.put(KEY_NOMBRE, feed.getNombre());
 		initialValues.put(KEY_WEB, feed.getWeb());
 		initialValues.put(KEY_FEED, feed.getFeed());
-		return db.insert(DATABASE_TABLE, null, initialValues);	
+		
+		long row = db.insert(DATABASE_TABLE, null, initialValues);
+		
+		if(row!=-1){
+			FeedTagDB ftdb = new FeedTagDB(context);
+			ftdb.open();
+			for(Tag tag : feed.getTags()){
+				ftdb.insertFeedTag(row, tag.getId());
+			}
+			ftdb.close();
+		}
+		
+		return row;
 	}
 	
 	public boolean deleteFeed(long id)
@@ -73,6 +85,12 @@ public class FeedDB {
 			feed.setNombre(cursor.getString(3));
 			feed.setWeb(cursor.getString(4));
 			feed.setFeed(cursor.getString(5));
+			
+			FeedTagDB ftdb = new FeedTagDB(context);
+			ftdb.open();
+			feed.setTags(ftdb.getTags(cursor.getInt(0)));
+			ftdb.close();
+			
         	feeds.add(feed);
        	    cursor.moveToNext();
         }
@@ -97,6 +115,13 @@ public class FeedDB {
 			feed.setWeb(cursor.getString(4));
 			feed.setFeed(cursor.getString(5));
 			
+			FeedTagDB ftdb = new FeedTagDB(context);
+			ftdb.open();
+			feed.setTags(ftdb.getTags(cursor.getInt(0)));
+			ftdb.close();
+			
+			cursor.close();
+			
 			return feed;
 		}
 		
@@ -118,6 +143,13 @@ public class FeedDB {
 			feed.setWeb(cursor.getString(4));
 			feed.setFeed(cursor.getString(5));
 			
+			FeedTagDB ftdb = new FeedTagDB(context);
+			ftdb.open();
+			feed.setTags(ftdb.getTags(cursor.getInt(0)));
+			ftdb.close();
+			
+			cursor.close();
+			
 			return feed;
 		}
 		
@@ -132,6 +164,8 @@ public class FeedDB {
 		args.put(KEY_NOMBRE, feed.getNombre());
 		args.put(KEY_WEB, feed.getWeb());
 		args.put(KEY_FEED, feed.getFeed());
+		
+		//TODO Actualizar tags si cambian.
 		
 	  return db.update(DATABASE_TABLE, args, KEY_ID + "=" + feed.getId(), null) > 0;
 	  
