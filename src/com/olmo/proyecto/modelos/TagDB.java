@@ -1,6 +1,7 @@
 package com.olmo.proyecto.modelos;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -68,6 +69,23 @@ public class TagDB {
 			tag.setNombre(cursor.getString(2));
 			tag.setShortid(cursor.getString(3));
         	tags.add(tag);
+       	    cursor.moveToNext();
+        }
+		
+		cursor.close();
+		
+		return tags;
+	}
+	
+	public HashSet<String> getAllHashGid()
+	{
+		Cursor cursor = db.query(DATABASE_TABLE, new String[] {KEY_GID}, null, null, null, null, null);
+		
+		HashSet<String> tags = new HashSet<String>();
+		
+		cursor.moveToFirst();
+		while (cursor.isAfterLast() == false) {
+        	tags.add(cursor.getString(0));
        	    cursor.moveToNext();
         }
 		

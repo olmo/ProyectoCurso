@@ -3,6 +3,7 @@ package com.olmo.proyecto;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -153,19 +154,23 @@ public class GReader {
 		
 		FeedDB feeddb = new FeedDB(context);
 		feeddb.open();
+		
+		HashSet<String> all_noticias = db.getAllHashGid();
 
 		for (Element noticia : noticias) {
-			Noticia item = new Noticia();
-
-			item.setGid(noticia.getElementsByTag("id").first().text());
-			item.setTitulo(noticia.getElementsByTag("title").first().text());
-			item.setAutor(noticia.getElementsByTag("author").text());
-			item.setContenido(noticia.getElementsByTag("summary").text());
-			item.setUrl(noticia.getElementsByTag("link").first().attr("href"));
-			item.setTimestamp(Long.valueOf(noticia.attr("gr:crawl-timestamp-msec")).longValue());
-			item.setFeed(feeddb.getFeed(noticia.getElementsByTag("source").attr("gr:stream-id")));
-
-			db.insertNoticia(item);
+			if(!all_noticias.contains(noticia.getElementsByTag("id").first().text())){
+				Noticia item = new Noticia();
+	
+				item.setGid(noticia.getElementsByTag("id").first().text());
+				item.setTitulo(noticia.getElementsByTag("title").first().text());
+				item.setAutor(noticia.getElementsByTag("author").text());
+				item.setContenido(noticia.getElementsByTag("summary").text());
+				item.setUrl(noticia.getElementsByTag("link").first().attr("href"));
+				item.setTimestamp(Long.valueOf(noticia.attr("gr:crawl-timestamp-msec")).longValue());
+				item.setFeed(feeddb.getFeed(noticia.getElementsByTag("source").attr("gr:stream-id")));
+	
+				db.insertNoticia(item);
+			}
 		}
 
 		feeddb.close();
@@ -189,16 +194,20 @@ public class GReader {
 
 		TagDB db = new TagDB(context);
 		db.open();
+		
+		HashSet<String> all_tags = db.getAllHashGid();
 
 		for (Element tag : tags) {
 			if (Func_Strings.FindWordInString(tag.getElementsByAttributeValue("name", "id").text(),_TAG_LABEL)) {
-				Tag item = new Tag();
-
-				item.setGid(tag.getElementsByTag("string").get(0).text());
-				item.setShortid(tag.getElementsByTag("string").get(1).text());
-				item.setNombre(tag.getElementsByTag("string").get(0).text().substring(32));
-
-				db.insertTag(item);
+				if(!all_tags.contains(tag.getElementsByTag("string").get(0).text())){
+					Tag item = new Tag();
+	
+					item.setGid(tag.getElementsByTag("string").get(0).text());
+					item.setShortid(tag.getElementsByTag("string").get(1).text());
+					item.setNombre(tag.getElementsByTag("string").get(0).text().substring(32));
+	
+					db.insertTag(item);
+				}
 			}
 		}
 
@@ -221,25 +230,28 @@ public class GReader {
 		FeedDB db = new FeedDB(context);
 		db.open();
 		
+		HashSet<String> all_feeds = db.getAllHashGid();
+		
 		for (Element feed : feeds) {
-			Feed item = new Feed();
-			
-			item.setGid(feed.getElementsByAttributeValue("name", "id").first().text());
-			item.setNombre(feed.getElementsByAttributeValue("name", "title").text());
-			item.setShortid(feed.getElementsByAttributeValue("name", "sortid").text());
-			item.setWeb(feed.getElementsByAttributeValue("name", "htmlUrl").text());
-			item.setFeed(item.getGid().substring(5));
-			
-			ArrayList<Tag> tags = new ArrayList<Tag>();
-			Elements tags_elem = feed.getElementsByTag("list").get(0).getElementsByTag("object");
-			
-			for (Element tag_elem : tags_elem){
-				tags.add(tagdb.getTag(tag_elem.getElementsByTag("string").first().text()));
+			if(!all_feeds.contains(feed.getElementsByAttributeValue("name", "id").first().text())){
+				Feed item = new Feed();
+				
+				item.setGid(feed.getElementsByAttributeValue("name", "id").first().text());
+				item.setNombre(feed.getElementsByAttributeValue("name", "title").text());
+				item.setShortid(feed.getElementsByAttributeValue("name", "sortid").text());
+				item.setWeb(feed.getElementsByAttributeValue("name", "htmlUrl").text());
+				item.setFeed(item.getGid().substring(5));
+				
+				ArrayList<Tag> tags = new ArrayList<Tag>();
+				Elements tags_elem = feed.getElementsByTag("list").get(0).getElementsByTag("object");
+				
+				for (Element tag_elem : tags_elem){
+					tags.add(tagdb.getTag(tag_elem.getElementsByTag("string").first().text()));
+				}
+				item.setTags(tags);
+				
+				db.insertFeed(item);
 			}
-			
-			item.setTags(tags);
-			
-			db.insertFeed(item);
 		}
 
 		tagdb.close();

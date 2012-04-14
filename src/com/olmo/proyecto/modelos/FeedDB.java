@@ -1,6 +1,7 @@
 package com.olmo.proyecto.modelos;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -92,6 +93,23 @@ public class FeedDB {
 			ftdb.close();
 			
         	feeds.add(feed);
+       	    cursor.moveToNext();
+        }
+		
+		cursor.close();
+		
+		return feeds;
+	}
+	
+	public HashSet<String> getAllHashGid()
+	{
+		Cursor cursor = db.query(DATABASE_TABLE, new String[] {KEY_GID}, null, null, null, null, null);
+		
+		HashSet<String> feeds = new HashSet<String>();
+		
+		cursor.moveToFirst();
+		while (cursor.isAfterLast() == false) {
+        	feeds.add(cursor.getString(0));
        	    cursor.moveToNext();
         }
 		

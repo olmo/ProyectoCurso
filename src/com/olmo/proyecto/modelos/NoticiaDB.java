@@ -1,6 +1,7 @@
 package com.olmo.proyecto.modelos;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import android.content.ContentValues;
@@ -90,6 +91,23 @@ public class NoticiaDB {
         }
 		
 		feeddb.close();
+		
+		cursor.close();
+		
+		return noticias;
+	}
+	
+	public HashSet<String> getAllHashGid()
+	{
+		Cursor cursor = db.query(DATABASE_TABLE, new String[] {KEY_GID}, null, null, null, null, null);
+		
+		HashSet<String> noticias = new HashSet<String>();
+		
+		cursor.moveToFirst();
+		while (cursor.isAfterLast() == false) {
+        	noticias.add(cursor.getString(0));
+       	    cursor.moveToNext();
+        }
 		
 		cursor.close();
 		
