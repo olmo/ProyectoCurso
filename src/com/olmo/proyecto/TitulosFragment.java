@@ -35,7 +35,7 @@ public class TitulosFragment extends ListFragment implements ActionBar.TabListen
 			if (message.arg1 == Activity.RESULT_OK ) {
 				Toast.makeText(getActivity(),"Actualizado", Toast.LENGTH_SHORT).show();
 				
-				populateList(tag_sel);
+				//populateList(tag_sel);
 			} else {
 				Toast.makeText(getActivity(), "Actualización fallida.", Toast.LENGTH_SHORT).show();
 			}
@@ -93,6 +93,12 @@ public class TitulosFragment extends ListFragment implements ActionBar.TabListen
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt("curChoice", mCurCheckPosition);
+    }
+    
+    @Override
+    public void onResume(){
+    	super.onResume();
+    	populateList(tag_sel);
     }
     
     public void populateList(int category) {
