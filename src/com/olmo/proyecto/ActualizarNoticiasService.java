@@ -33,7 +33,6 @@ public class ActualizarNoticiasService extends IntentService {
 		int result = Activity.RESULT_CANCELED;
 		
 		try{
-			
 			GReader.getTags(ActualizarNoticiasService.this);
 			GReader.getFeeds(ActualizarNoticiasService.this);
 			GReader.getNoticias(ActualizarNoticiasService.this);

@@ -28,6 +28,7 @@ public class TitulosFragment extends ListFragment implements ActionBar.TabListen
 	boolean mDualPane;
     int mCurCheckPosition = 0;
     private int tag_sel = 0;
+    private ArrayList<Noticia> noticias;
     
     private Handler handler = new Handler() {
 		public void handleMessage(Message message) {
@@ -105,7 +106,7 @@ public class TitulosFragment extends ListFragment implements ActionBar.TabListen
     	if(category==0){
 	        NoticiaDB noticiaDB = new NoticiaDB(getActivity());
 	        noticiaDB.open();
-	        ArrayList<Noticia> noticias = noticiaDB.getAll();
+	        noticias = noticiaDB.getAll();
 	        noticiaDB.close();
 	        
 	        String[] items = new String[noticias.size()];
@@ -127,7 +128,7 @@ public class TitulosFragment extends ListFragment implements ActionBar.TabListen
     		
     		NoticiaDB noticiaDB = new NoticiaDB(getActivity());
 	        noticiaDB.open();
-	        ArrayList<Noticia> noticias = noticiaDB.getAllfromFeeds(feeds);
+	        noticias = noticiaDB.getAllfromFeeds(feeds);
 	        noticiaDB.close();
 	        
 	        String[] items = new String[noticias.size()];
@@ -158,39 +159,35 @@ public class TitulosFragment extends ListFragment implements ActionBar.TabListen
     void showDetails(int index) {
         mCurCheckPosition = index;
         
-        NoticiaDB noticiaDB = new NoticiaDB(getActivity());
-        noticiaDB.open();
-        ArrayList<Noticia> noticias = noticiaDB.getAll();
-        noticiaDB.close();
         if(noticias.size()>0){
-        if (mDualPane) {
-            // We can display everything in-place with fragments, so update
-            // the list to highlight the selected item and show the data.
-            getListView().setItemChecked(index, true);
-
-            // Check what fragment is currently shown, replace if needed.
-            ContenidoFragment details = (ContenidoFragment) getFragmentManager().findFragmentById(R.id.details);
-            
-            if (details == null || details.getShownIndex() != noticias.get(index).getId()) {
-                // Make new fragment to show this selection.
-                details = ContenidoFragment.newInstance(noticias.get(index).getId());
-
-                // Execute a transaction, replacing any existing fragment
-                // with this one inside the frame.
-                FragmentTransaction ft = getFragmentManager().beginTransaction();
-                ft.replace(R.id.details, details);
-                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-                ft.commit();
-            }
-
-        } else {
-            // Otherwise we need to launch a new activity to display
-            // the dialog fragment with selected text.
-            Intent intent = new Intent();
-            intent.setClass(getActivity(), ContenidoActivity.class);
-            intent.putExtra("index", noticias.get(index).getId());
-            startActivity(intent);
-        }
+	        if (mDualPane) {
+	            // We can display everything in-place with fragments, so update
+	            // the list to highlight the selected item and show the data.
+	            getListView().setItemChecked(index, true);
+	
+	            // Check what fragment is currently shown, replace if needed.
+	            ContenidoFragment details = (ContenidoFragment) getFragmentManager().findFragmentById(R.id.details);
+	            
+	            if (details == null || details.getShownIndex() != noticias.get(index).getId()) {
+	                // Make new fragment to show this selection.
+	                details = ContenidoFragment.newInstance(noticias.get(index).getId());
+	
+	                // Execute a transaction, replacing any existing fragment
+	                // with this one inside the frame.
+	                FragmentTransaction ft = getFragmentManager().beginTransaction();
+	                ft.replace(R.id.details, details);
+	                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+	                ft.commit();
+	            }
+	
+	        } else {
+	            // Otherwise we need to launch a new activity to display
+	            // the dialog fragment with selected text.
+	            Intent intent = new Intent();
+	            intent.setClass(getActivity(), ContenidoActivity.class);
+	            intent.putExtra("index", noticias.get(index).getId());
+	            startActivity(intent);
+	        }
         }
     }
     
