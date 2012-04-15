@@ -3,7 +3,9 @@ package com.olmo.proyecto;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -34,6 +36,13 @@ public class GReader {
 	private static final String _SUBSCRIPTION_URL = _API_URL + "subscription/edit";
 	private static final String _SUBSCRIPTION_LIST_URL = _API_URL + "subscription/list";
 	private static final String _READING_LIST_URL = _READER_BASE_URL + "atom/user/-/state/com.google/reading-list";
+	private static final String _MARCAR_LEIDO_URL = _READER_BASE_URL + "api/0/edit-tag";
+	
+	private Context context = null;
+	
+	public GReader(Context c){
+		context = c;
+	}
 
 	/**
 	 * Returns a Google Authentication Key Requires a Google Username and
@@ -76,15 +85,12 @@ public class GReader {
 	 *            Google Password
 	 * @return Google authorisation token
 	 */
-	public static String getGoogleToken(String _USERNAME, String _PASSWORD)
-			throws UnsupportedEncodingException, IOException {
+	public static String getGoogleToken() throws UnsupportedEncodingException, IOException {
 		Document doc = Jsoup
 				.connect(_TOKEN_URL)
-				.header("Authorization",
-						_AUTHPARAMS + getGoogleAuthKey(_USERNAME, _PASSWORD))
+				.header("Authorization",_AUTHPARAMS + ProyectoCursoActivity.googleAuthKey)
 				.userAgent("Proyecto").timeout(4000).get();
-
-		// RETRIEVES THE RESPONSE TOKEN
+		
 		String _TOKEN = doc.body().text();
 		return _TOKEN;
 	}
@@ -256,6 +262,41 @@ public class GReader {
 
 		tagdb.close();
 		db.close();
+		
+	}
+	
+	public void marcarLeido(int id){
+		/*
+		 * $req = POST $baseUrl, [
+i => $guid, s => $url, a => 'user/-/state/com.google/read', ac => 'edit-tags', T => $token
+];
+		 */
+		NoticiaDB db = new NoticiaDB(context);
+		db.open();
+		Noticia noticia = db.getNoticia(id);
+		db.close();
+		
+		Map<String, String> datamap = new HashMap<String, String>();
+		
+		try{
+			datamap.put("i", noticia.getGid());
+			datamap.put("a", "user/-/state/com.google/read");
+			datamap.put("ac", "edit-tags");
+			datamap.put("T", GReader.getGoogleToken());
+		}
+		catch(IOException e){
+			
+		}
+		
+		try{	
+			Jsoup
+				.connect(_MARCAR_LEIDO_URL)
+				.header("Authorization", _AUTHPARAMS + ProyectoCursoActivity.googleAuthKey)
+				.userAgent("Proyecto").data(datamap).timeout(5000).post();
+		}
+		catch(IOException e){
+			
+		}
 		
 	}
 }
