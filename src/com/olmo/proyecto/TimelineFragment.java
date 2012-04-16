@@ -1,7 +1,6 @@
 package com.olmo.proyecto;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.List;
 
 import twitter4j.Status;
@@ -12,12 +11,15 @@ import twitter4j.auth.AccessToken;
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
 import android.app.ListFragment;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.olmo.proyectocurso.R;
 
@@ -115,15 +117,16 @@ public class TimelineFragment extends ListFragment implements ActionBar.TabListe
 	    
 		@Override
 		protected void onPostExecute(Void result){
-			String[] items = new String[statuses.size()];
+			/*String[] items = new String[statuses.size()];
 	        
 	        int i=0;
 	        for (twitter4j.Status status : statuses){
-	    		items[i] = status.getText();
+	    		items[i] = status.getUser().getName()+" : "+status.getText();
 	        	i++;
 	        }
 			
-			setListAdapter(new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_activated_1, items));
+			setListAdapter(new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_activated_1, items));*/
+			setListAdapter(new StatusAdapter(getActivity(), R.layout.tweet, statuses));
 		}
 		
 		@Override
@@ -146,6 +149,36 @@ public class TimelineFragment extends ListFragment implements ActionBar.TabListe
 			
 			return null;
 		}
+    }
+    
+    private class StatusAdapter extends ArrayAdapter<Status> {
+
+        private List<Status> items;
+
+        public StatusAdapter(Context context, int textViewResourceId, List<Status> items) {
+            super(context, textViewResourceId, items);
+            this.items = items;
+        }
+        
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View v = convertView;
+            if (v == null) {
+                LayoutInflater vi = (LayoutInflater)getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                v = vi.inflate(R.layout.tweet, null);
+            }
+            Status o = items.get(position);
+            if (o != null) {
+                TextView tt = (TextView) v.findViewById(R.id.textView4);
+                TextView bt = (TextView) v.findViewById(R.id.textView5);
+                if (tt != null) {
+                      tt.setText(o.getUser().getName());                            }
+                if(bt != null){
+                      bt.setText(o.getText());
+                }
+            }
+            return v;
+        }
     }
    
 }

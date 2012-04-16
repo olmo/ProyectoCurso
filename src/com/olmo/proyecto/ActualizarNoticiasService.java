@@ -24,7 +24,7 @@ public class ActualizarNoticiasService extends IntentService {
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-	    Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
+	    //Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
 	    return super.onStartCommand(intent,flags,startId);
 	}
 

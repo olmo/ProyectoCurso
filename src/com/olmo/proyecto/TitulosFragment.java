@@ -34,11 +34,11 @@ public class TitulosFragment extends ListFragment implements ActionBar.TabListen
 		public void handleMessage(Message message) {
 			//Object path = message.obj;
 			if (message.arg1 == Activity.RESULT_OK ) {
-				Toast.makeText(getActivity(),"Actualizado", Toast.LENGTH_SHORT).show();
+				//Toast.makeText(getActivity(),"Actualizado", Toast.LENGTH_SHORT).show();
 				
 				//populateList(tag_sel);
 			} else {
-				Toast.makeText(getActivity(), "Actualización fallida.", Toast.LENGTH_SHORT).show();
+				//Toast.makeText(getActivity(), "Actualización fallida.", Toast.LENGTH_SHORT).show();
 			}
 
 		};
