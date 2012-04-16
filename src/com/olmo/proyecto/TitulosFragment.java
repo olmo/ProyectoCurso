@@ -89,6 +89,14 @@ public class TitulosFragment extends ListFragment implements ActionBar.TabListen
             showDetails(mCurCheckPosition);
         }
     }
+    
+    @Override
+    public void onDestroyView (){
+    	super.onDestroyView();
+    	
+    	 ActionBar bar = getActivity().getActionBar();
+    	 bar.removeAllTabs();
+    }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -192,12 +200,14 @@ public class TitulosFragment extends ListFragment implements ActionBar.TabListen
     }
     
     public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
-        TitulosFragment titleFrag = (TitulosFragment) getFragmentManager().findFragmentById(R.id.titles);
-        titleFrag.populateList(tab.getPosition());
-        
-        if (mDualPane) {
-            titleFrag.showDetails(0);
-        }
+    	if(getFragmentManager().findFragmentById(R.id.titles) instanceof TitulosFragment){
+	        TitulosFragment titleFrag = (TitulosFragment) getFragmentManager().findFragmentById(R.id.titles);
+	        titleFrag.populateList(tab.getPosition());
+	        
+	        if (mDualPane) {
+	            titleFrag.showDetails(0);
+	        }
+    	}
     }
 
     /* These must be implemented, but we don't use them */
