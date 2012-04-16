@@ -3,5 +3,12 @@
 
     <string name="hello">Hello World, ProyectoCursoActivity!</string>
     <string name="app_name">ProyectoCurso</string>
+    <string name="configuracion_cuentas">Configuración de las cuentas</string>
+    <string name="greader_noconf">Google reader no está configurado.</string>
+    <string name="configurar">Configurar</string>
+    <string name="twitter_noconf">Twitter no está configurado.</string>
+    <string name="twitter_conf">Twitter está configurado.</string>
+    <string name="greader_conf">Google Reader está configurado.</string>
+    <string name="terminar">Terminar</string>
 
 </resources>

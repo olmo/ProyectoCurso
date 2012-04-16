@@ -25,6 +25,23 @@
             </intent-filter>
         </activity>
         
+        <activity
+            android:name="com.olmo.proyecto.ConfiguracionCuentasActivity"
+            android:label="@string/app_name"
+            android:launchMode="singleInstance" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.BROWSABLE" />
+				<data android:scheme="proyectocurso" android:host="main" />
+			</intent-filter>
+        </activity>
+        
         <receiver android:name=".ActualizarNoticiasReceiver" />
         <service android:name="com.olmo.proyecto.ActualizarNoticiasService"></service>
     </application>

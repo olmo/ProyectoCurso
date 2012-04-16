@@ -101,8 +101,8 @@ public class ContenidoFragment extends Fragment {
 
         },null));*/
         
-        URLImageParser p = new URLImageParser(text, this.getActivity());
-        text.setText(Html.fromHtml(noticia.getContenido(), p, null));
+        //URLImageParser p = new URLImageParser(text, this.getActivity());
+        text.setText(Html.fromHtml(noticia.getContenido(), null, null));
         
         return scroller;
     }
